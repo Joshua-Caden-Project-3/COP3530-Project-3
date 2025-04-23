@@ -14,8 +14,10 @@ int main() {
         MatchResult match = FootballData::parseJsonFile(entry.path().string());
         data.push_back(match);
     }
+    std::cout << "This program is intended to predict a team's chance of winning!\nInput a digit specifying which command and variables accordingly.\nUse _ for the spaces in a team's name." << std::endl;
+
     while (loop) {
-        std::cout << "This program is intended to predict a team's chance of winning!\nInput a digit specifying which command and variables accordingly.\nUse _ for the spaces in a team's name i.e. 2 Real_Madrid Manchester_United.\n1: Team\n2: Team Opponent\n3: Quit" << std::endl;
+        std::cout << "1: Team\n2: Team Opponent\n3: Quit\nExample: 2 Real_Madrid Manchester_United" << std::endl;
         std::string line;
         std::getline(std::cin, line);
         std::istringstream stream(line);
@@ -66,7 +68,7 @@ int main() {
             std::cout << "Have a great day!" << std::endl;
         }
         else {
-            std::cout << "We didn't quite understand your input.\n1 Team_Name\n2 Team_Name Opponent_Name\n3" << std::endl;
+            std::cout << "We didn't quite understand your input." << std::endl;
         }
     }
     return 0;
