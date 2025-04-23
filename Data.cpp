@@ -1,44 +1,14 @@
 #include "Data.h"
 #include <fstream>
 #include <sstream>
-#include <algorithm>
-#include <cctype>
-#include <iostream> // For std::cerr
 
 namespace fs = std::filesystem;
 
-bool FootballData::loadFromDirectory(const std::string& data_path) {
-    matches_.clear();
-
-    try {
-        // Iterate through competition directories
-        for (const auto& competition_entry : fs::directory_iterator(data_path)) {
-            if (!competition_entry.is_directory()) continue;
-
-            // Iterate through season files in each competition directory
-            for (const auto& season_entry : fs::directory_iterator(competition_entry.path())) {
-                if (season_entry.path().extension() == ".json") {
-                    if (!parseJsonFile(season_entry.path().string())) {
-                        std::cerr << "Warning: Failed to parse " << season_entry.path() << "\n";
-                    }
-                }
-            }
-        }
-        return !matches_.empty();
-    } catch (const fs::filesystem_error& e) {
-        std::cerr << "Filesystem error: " << e.what() << "\n";
-        return false;
-    } catch (...) {
-        std::cerr << "Unknown error loading data\n";
-        return false;
-    }
-}
-
-bool FootballData::parseJsonFile(const std::string& file_path) {
+MatchResult FootballData::parseJsonFile(const std::string& file_path) {
+    MatchResult match;
     std::ifstream file(file_path);
     if (!file.is_open()) {
         std::cerr << "Failed to open file: " << file_path << "\n";
-        return false;
     }
 
     std::stringstream buffer;
@@ -56,7 +26,6 @@ bool FootballData::parseJsonFile(const std::string& file_path) {
         std::string match_json = json_str.substr(pos, end_pos - pos + 1);
         pos = end_pos + 1;
 
-        MatchResult match;
         try {
             // Extract competition name
             match.competition = extractJsonValue(match_json, "competition_name");
@@ -77,7 +46,6 @@ bool FootballData::parseJsonFile(const std::string& file_path) {
             match.date = extractJsonValue(match_json, "match_date");
 
             if (!match.home_team.empty() && !match.away_team.empty()) {
-                matches_.push_back(match);
                 match_count++;
             }
         } catch (...) {
@@ -87,10 +55,9 @@ bool FootballData::parseJsonFile(const std::string& file_path) {
 
     if (match_count == 0) {
         std::cerr << "Warning: No valid matches found in " << file_path << "\n";
-        return false;
     }
 
-    return true;
+    return match;
 }
 
 std::string FootballData::extractJsonValue(const std::string& json, const std::string& key) {
@@ -107,7 +74,7 @@ std::string FootballData::extractJsonValue(const std::string& json, const std::s
     return json.substr(value_start + 1, value_end - value_start - 1);
 }
 
-int FootballData::extractJsonInt(const std::string& json, const std::string& key) {
+ int FootballData::extractJsonInt(const std::string& json, const std::string& key) {
     const std::string key_pattern = "\"" + key + "\":";
     size_t key_pos = json.find(key_pattern);
     if (key_pos == std::string::npos) return 0;
@@ -121,26 +88,4 @@ int FootballData::extractJsonInt(const std::string& json, const std::string& key
     } catch (...) {
         return 0;
     }
-}
-
-const std::vector<MatchResult>& FootballData::getAllMatches() const {
-    return matches_;
-}
-
-std::vector<MatchResult> FootballData::getMatchesForTeam(const std::string& team_name) const {
-    std::vector<MatchResult> result;
-    std::copy_if(matches_.begin(), matches_.end(), std::back_inserter(result),
-                 [&team_name](const MatchResult& m) {
-                     return m.home_team == team_name || m.away_team == team_name;
-                 });
-    return result;
-}
-
-std::vector<MatchResult> FootballData::getMatchesForCompetition(const std::string& competition) const {
-    std::vector<MatchResult> result;
-    std::copy_if(matches_.begin(), matches_.end(), std::back_inserter(result),
-                 [&competition](const MatchResult& m) {
-                     return m.competition == competition;
-                 });
-    return result;
 }

@@ -22,17 +22,12 @@ struct MatchResult {
 
 class FootballData {
 public:
-    bool loadFromDirectory(const std::string& data_path);
-    const std::vector<MatchResult>& getAllMatches() const;
 
-    std::vector<MatchResult> getMatchesForTeam(const std::string& team_name) const;
-    std::vector<MatchResult> getMatchesForCompetition(const std::string& competition) const;
+    static MatchResult parseJsonFile(const std::string& file_path);
+    static std::string extractJsonValue(const std::string& json, const std::string& key);
+    static int extractJsonInt(const std::string& json, const std::string& key);
 
-private:
-    std::vector<MatchResult> matches_;
-    bool parseJsonFile(const std::string& file_path);
-    std::string extractJsonValue(const std::string& json, const std::string& key);
-    int extractJsonInt(const std::string& json, const std::string& key);
+
 };
 
 
