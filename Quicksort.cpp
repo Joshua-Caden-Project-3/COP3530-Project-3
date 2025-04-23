@@ -5,6 +5,7 @@
 // returning a subset using a data structure of type T. T cannot be a vector
 template <typename T>
 T Quicksort(const T& data, const std::string& home_team, const std::string& opponent = "") {
+    if (data.empty()) return {};
     auto pivot = data[0];
     T right, subset; // This will be subset of the data that is usable for our formula
     for (int i=0; i < data.size(); i++) {
@@ -22,5 +23,6 @@ T Quicksort(const T& data, const std::string& home_team, const std::string& oppo
         subset.push_back(pivot);
     }
     subset.insert(subset.end(), right.begin(), right.end());
+    if (subset.empty()) return {};
     return subset;
 }

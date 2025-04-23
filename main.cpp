@@ -24,8 +24,6 @@ int main() {
     double numerator=0, denominator=0;
     if (num == "1") {
         std::vector<MatchResult> mdata = Mergesort(data, 0, data.size() - 1, name, "");
-        std::vector<MatchResult> qdata = Quicksort(data, name, "");
-        std::cout << "1" << std::endl;
         for (int i = 0; i < mdata.size(); i++) {
             double weight = (i+1) / mdata.size();
             if (mdata[i].home_team == name) {
@@ -37,32 +35,36 @@ int main() {
                 denominator+=weight;
             }
         }
+       if (mdata.size() > 0) {
+           std::cout << numerator/denominator << std::endl;
+       }
     }
     else if (num == "2") {
-        std::vector<MatchResult> mdata = Mergesort(data, 0, data.size() - 1, name, opp);
         std::vector<MatchResult> qdata = Quicksort(data, name, opp);
-        for (int i = 0; i < mdata.size(); i++) {
-            double weight = (i+1) / mdata.size();
-            if (mdata[i].home_team == name && mdata[i].away_team == opp) {
+        for (int i = 0; i < qdata.size(); i++) {
+            double weight = (i+1) / qdata.size();
+            if (qdata[i].home_team == name && qdata[i].away_team == opp) {
                 weight*=2;
-                if (mdata[i].home_score > mdata[i].away_score) numerator += weight;
+                if (qdata[i].home_score > qdata[i].away_score) numerator += weight;
                 denominator+=weight;
             }
-            else if (mdata[i].home_team == opp && mdata[i].away_team == name) {
+            else if (qdata[i].home_team == opp && qdata[i].away_team == name) {
                 weight*=2;
-                if (mdata[i].home_score < mdata[i].away_score) numerator += weight;
+                if (qdata[i].home_score < qdata[i].away_score) numerator += weight;
                 denominator+=weight;
             }
-            else if (mdata[i].home_team == opp && mdata[i].away_score > mdata[i].home_score){
+            else if (qdata[i].home_team == opp && qdata[i].away_score > qdata[i].home_score){
                 numerator += weight;
                 denominator+=weight;
             }
-            else if (mdata[i].home_team == name && mdata[i].away_score < mdata[i].home_score){
+            else if (qdata[i].home_team == name && qdata[i].away_score < qdata[i].home_score){
                 numerator += weight;
                 denominator+=weight;
             }
         }
-
+        if (qdata.size() > 0) {
+            std::cout << numerator/denominator << std::endl;
+        }
     }
     else if (num == "3") {
         std::cout << "Have a great day!" << std::endl;

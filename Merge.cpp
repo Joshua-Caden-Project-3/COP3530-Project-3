@@ -8,14 +8,6 @@ void Merge(T& subset, T& Lsort, T& Rsort, const std::string& home_team, const st
     auto R = Rsort.begin();
 
     while (L != Lsort.end() && R != Rsort.end()) {
-        if (L->home_team != home_team && L->away_team != home_team) {
-            L++;
-            continue;
-        }
-        if (R->home_team != home_team && R->away_team != home_team) {
-            R++;
-            continue;
-        }
         if (L->date < R->date) {
             subset.push_back(*L);
             L++;
