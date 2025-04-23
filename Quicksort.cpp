@@ -8,7 +8,7 @@ T Quicksort(const T& data, const std::string& home_team, const std::string& oppo
     if (data.empty()) return {};
     auto pivot = data[0];
     T right, subset; // This will be subset of the data that is usable for our formula
-    for (int i=0; i < data.size(); i++) {
+    for (int i=1; i < data.size(); i++) {
         if (data[i].home_team != home_team && data[i].away_team != home_team) continue;
         if (data[i].date < pivot.date) {
             subset.push_back(data[i]);

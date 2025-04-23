@@ -1,91 +1,63 @@
 #include "Data.h"
 #include <fstream>
-#include <sstream>
+#include <iostream>
+#include <json.hpp>
 
 namespace fs = std::filesystem;
+using json = nlohmann::json;
 
-MatchResult FootballData::parseJsonFile(const std::string& file_path) {
-    MatchResult match;
+std::vector<MatchResult> FootballData::parseJsonFile(const std::string& file_path) {
+    std::vector<MatchResult> matches;
     std::ifstream file(file_path);
+
     if (!file.is_open()) {
-        std::cerr << "Failed to open file: " << file_path << "\n";
+        std::cerr << "Failed to open file: " << file_path << std::endl;
+        return matches;
     }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    std::string json_str = buffer.str();
-    file.close();
-
-    size_t pos = 0;
-    size_t match_count = 0;
-
-    while ((pos = json_str.find('{', pos)) != std::string::npos) {
-        size_t end_pos = json_str.find('}', pos);
-        if (end_pos == std::string::npos) break;
-
-        std::string match_json = json_str.substr(pos, end_pos - pos + 1);
-        pos = end_pos + 1;
-
-        try {
-            // Extract competition name
-            match.competition = extractJsonValue(match_json, "competition_name");
-
-            // Extract home team info
-            std::string home_team_json = extractJsonValue(match_json, "home_team");
-            match.home_team = extractJsonValue(home_team_json, "home_team_name");
-
-            // Extract away team info
-            std::string away_team_json = extractJsonValue(match_json, "away_team");
-            match.away_team = extractJsonValue(away_team_json, "away_team_name");
-
-            // Extract scores
-            match.home_score = extractJsonInt(match_json, "home_score");
-            match.away_score = extractJsonInt(match_json, "away_score");
-
-            // Extract date
-            match.date = extractJsonValue(match_json, "match_date");
-
-            if (!match.home_team.empty() && !match.away_team.empty()) {
-                match_count++;
-            }
-        } catch (...) {
-            continue;
-        }
-    }
-
-    if (match_count == 0) {
-        std::cerr << "Warning: No valid matches found in " << file_path << "\n";
-    }
-
-    return match;
-}
-
-std::string FootballData::extractJsonValue(const std::string& json, const std::string& key) {
-    const std::string key_pattern = "\"" + key + "\":";
-    size_t key_pos = json.find(key_pattern);
-    if (key_pos == std::string::npos) return "";
-
-    size_t value_start = json.find_first_of("\"", key_pos + key_pattern.length());
-    if (value_start == std::string::npos) return "";
-
-    size_t value_end = json.find_first_of("\"", value_start + 1);
-    if (value_end == std::string::npos) return "";
-
-    return json.substr(value_start + 1, value_end - value_start - 1);
-}
-
- int FootballData::extractJsonInt(const std::string& json, const std::string& key) {
-    const std::string key_pattern = "\"" + key + "\":";
-    size_t key_pos = json.find(key_pattern);
-    if (key_pos == std::string::npos) return 0;
-
-    size_t value_start = key_pos + key_pattern.length();
-    size_t value_end = json.find_first_of(",}", value_start);
 
     try {
-        std::string num_str = json.substr(value_start, value_end - value_start);
-        return std::stoi(num_str);
-    } catch (...) {
-        return 0;
+        json data;
+        file >> data;
+
+        if (data.is_array()) {
+            for (const auto& match_data : data) {
+                MatchResult match;
+                match.competition = match_data.value("competition_name", "");
+                match.home_team = match_data["home_team"].value("home_team_name", "");
+                match.away_team = match_data["away_team"].value("away_team_name", "");
+                match.home_score = match_data.value("home_score", 0);
+                match.away_score = match_data.value("away_score", 0);
+                match.date = match_data.value("match_date", "");
+
+                if (!match.home_team.empty() && !match.away_team.empty()) {
+                    matches.push_back(match);
+                }
+            }
+        }
+    } catch (const json::exception& e) {
+        std::cerr << "JSON error in " << file_path << ": " << e.what() << std::endl;
     }
+
+    return matches;
+}
+
+std::vector<MatchResult> FootballData::loadAllMatches(const std::string& directory_path) {
+    std::vector<MatchResult> all_matches;
+
+    if (!fs::exists(directory_path)) {
+        throw std::runtime_error("Directory not found: " + directory_path);
+    }
+
+    try {
+        for (const auto& entry : fs::recursive_directory_iterator(directory_path)) {
+            if (entry.path().extension() == ".json") {
+                auto file_matches = parseJsonFile(entry.path().string());
+                all_matches.insert(all_matches.end(), file_matches.begin(), file_matches.end());
+            }
+        }
+    } catch (const fs::filesystem_error& e) {
+        throw std::runtime_error("Filesystem error: " + std::string(e.what()));
+    }
+
+    return all_matches;
 }

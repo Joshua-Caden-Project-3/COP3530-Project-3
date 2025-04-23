@@ -11,7 +11,7 @@ T Mergesort(const T& data, int left, int right, const std::string& home_team, co
         if (left < data.size()) {
             const auto& match = data[left];
             if (match.home_team == home_team && match.away_team == opponent || match.away_team == home_team && match.home_team == opponent)
-            base.push_back(data[left]);
+                base.push_back(data[left]);
         }
         return base;
     }
@@ -21,4 +21,3 @@ T Mergesort(const T& data, int left, int right, const std::string& home_team, co
     Merge<T>(subset, Lsort, Rsort, home_team, opponent);
     return subset;
 }
-

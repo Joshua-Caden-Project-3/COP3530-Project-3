@@ -1,15 +1,10 @@
-
-//
-// Created by Joshie Land on 4/20/25.
-//
-
 #ifndef COP3530_P3_DATA_H
 #define COP3530_P3_DATA_H
 
 #include <string>
 #include <vector>
 #include <filesystem>
-#include <iostream>
+#include <json.hpp>
 
 struct MatchResult {
     std::string competition;
@@ -22,16 +17,8 @@ struct MatchResult {
 
 class FootballData {
 public:
-
-    static MatchResult parseJsonFile(const std::string& file_path);
-    static std::string extractJsonValue(const std::string& json, const std::string& key);
-    static int extractJsonInt(const std::string& json, const std::string& key);
-
-
+    static std::vector<MatchResult> parseJsonFile(const std::string& file_path);
+    static std::vector<MatchResult> loadAllMatches(const std::string& directory_path);
 };
 
-
-
-
-
-#endif //COP3530_P3_DATA_H
+#endif // COP3530_P3_DATA_H
