@@ -7,3 +7,4 @@ After running this program you will be prompted for input in one of the followin
 1 will calculate the win percentage against a random opponent.
 2 will calculate the win percentage against a specific opponent.
 3 will exit the program.
+*Change CMake to add nlohmann-json External Library*
